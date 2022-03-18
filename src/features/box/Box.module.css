@@ -1,20 +1,6 @@
 .box {
-    position: absolute;
-    cursor: move;
-    color: black;
-    border-radius: 5px;
-    padding: 1em;
-    margin: auto;
-    user-select: none;
-    background: lightgrey;
-    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    border : solid 1px black;
+    background-color: white;
 }
-
-.resize_bar_n { position: absolute; top: -4px; right: 0px; bottom: initial; left: 0px; height: 4px; cursor: n-resize; }
-.resize_bar_e { position: absolute; top: 0px; right: -4px; bottom: 0px; left: initial; width: 4px; cursor: e-resize; }
-.resize_bar_s { position: absolute; top: initial; right: 0px; bottom: -4px; left: 0px; height: 4px; cursor: s-resize; }
-.resize_bar_w { position: absolute; top: 0px; right: initial; bottom: 0px; left: -4px; width: 4px; cursor: w-resize; }
-.resize_bar_nw { position: absolute; top: -4px; right: initial; bottom: initial; left: -4px; height: 4px; width: 4px; cursor: nw-resize; }
-.resize_bar_ne { position: absolute; top: -4px; right: -4px; bottom: initial; left: initial; height: 4px; width: 4px; cursor: ne-resize; }
-.resize_bar_sw { position: absolute; top: initial; right: initial; bottom: -4px; left: -4px; height: 4px; width: 4px; cursor: sw-resize; }
-.resize_bar_se { position: absolute; top: initial; right: -4px; bottom: -4px; left: initial; height: 4px; width: 4px; cursor: se-resize; }

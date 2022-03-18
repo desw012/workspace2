@@ -20,28 +20,24 @@ code {
 
 .react-draggable {
   box-sizing: border-box;
+  position: absolute;
 }
 
 .react-resizable {
   position: relative;
 }
-.react-resizable-handle {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background-repeat: no-repeat;
-  background-origin: content-box;
-  box-sizing: border-box;
-  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2IDYiIHN0eWxlPSJiYWNrZ3JvdW5kLWNvbG9yOiNmZmZmZmYwMCIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSI2cHgiIGhlaWdodD0iNnB4Ij48ZyBvcGFjaXR5PSIwLjMwMiI+PHBhdGggZD0iTSA2IDYgTCAwIDYgTCAwIDQuMiBMIDQgNC4yIEwgNC4yIDQuMiBMIDQuMiAwIEwgNiAwIEwgNiA2IEwgNiA2IFoiIGZpbGw9IiMwMDAwMDAiLz48L2c+PC9zdmc+');
-  background-position: bottom right;
-  padding: 0 3px 3px 0;
-}
-.react-resizable-handle-sw {
-  bottom: 0;
-  left: 0;
-  cursor: sw-resize;
-  transform: rotate(90deg);
-}
+.react-resizable-handle { position: absolute; }
+.react-resizable-handle-n { top: -4px; right: 0px; bottom: initial; left: 0px; height: 4px; cursor: n-resize; }
+.react-resizable-handle-e { top: 0px; right: -4px; bottom: 0px; left: initial; width: 4px; cursor: e-resize; }
+.react-resizable-handle-s { top: initial; right: 0px; bottom: -4px; left: 0px; height: 4px; cursor: s-resize; }
+.react-resizable-handle-w { top: 0px; right: initial; bottom: 0px; left: -4px; width: 4px; cursor: w-resize; }
+.react-resizable-handle-nw { top: -4px; right: initial; bottom: initial; left: -4px; height: 4px; width: 4px; cursor: nw-resize; }
+.react-resizable-handle-ne { top: -4px; right: -4px; bottom: initial; left: initial; height: 4px; width: 4px; cursor: ne-resize; }
+.react-resizable-handle-sw { top: initial; right: initial; bottom: -4px; left: -4px; height: 4px; width: 4px; cursor: sw-resize; }
+.react-resizable-handle-se { top: initial; right: -4px; bottom: -4px; left: initial; height: 4px; width: 4px; cursor: se-resize; }
+
+/*
+
 .react-resizable-handle-se {
   bottom: 0;
   right: 0;
@@ -87,3 +83,4 @@ code {
   bottom: 0;
   transform: rotate(45deg);
 }
+*/

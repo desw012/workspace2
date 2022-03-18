@@ -3,10 +3,16 @@ import React, {useState} from "react";
 import styles from './Box.module.css'
 import {Resizable, ResizableBox} from "react-resizable";
 
-export function Box(){
+let g_zIndex = 0;
+
+export interface BoxProps  {
+    children?: React.ReactNode
+}
+export function Box(props: BoxProps){
     const [position, setPosition] = useState({x: 0, y: 0});
     const [size, setSize] = useState({width:200, height:200});
     const [bounds, setBounds] = useState<DraggableBounds | string | false >(false);
+    const [zIndex, setZIndex] = useState(g_zIndex);
 
     const nodeRef = React.useRef<HTMLDivElement> (null);
 
@@ -14,7 +20,13 @@ export function Box(){
         setPosition({ x: data.x, y: data.y });
     };
 
+    const incZIndex = () => {
+        setZIndex(++g_zIndex);
+    }
+
     const handleStart = (e: DraggableEvent, data: DraggableData) => {
+        incZIndex();
+
         if(e.target && (e.target as HTMLElement).classList.contains('react-resizable-handle')){
             let resizeClassName = '';
             (e.target as HTMLElement).classList.forEach((className)=>{
@@ -70,13 +82,16 @@ export function Box(){
 
 
             setBounds(bounds);
+        } else if(e.target && (e.target as HTMLElement).closest('.draggable_handle')) {
+              return;
+        } else {
+            return false;
         }
     }
 
     const handleStop = (e: DraggableEvent, data: DraggableData) => {
         setBounds(false);
     }
-
 
     return(
         <Draggable onDrag={ (e, data) => trackPos(data)}
@@ -85,14 +100,11 @@ export function Box(){
                    onStop={handleStop}
                    bounds={bounds}
                    >
-                <div ref={nodeRef} >
+                <div ref={nodeRef} style={{zIndex : zIndex}}>
                     <ResizableBox width={200} height={200} resizeHandles={['s' , 'w' , 'e' , 'n' , 'sw' , 'nw' , 'se' , 'ne']}
                     >
-                        <div>
-                            <h1 className={"draggable_handle"}>TEST</h1>
-                            <div>
-                        Drag
-                            </div>
+                        <div className={styles.box}>
+                            {props.children}
                         </div>
                     </ResizableBox>
                 </div>
