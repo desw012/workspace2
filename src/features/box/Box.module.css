@@ -1,6 +1,18 @@
 .box {
     width: 100%;
     height: 100%;
-    border : solid 1px black;
     background-color: white;
+    box-sizing: border-box;
+    border-radius: 12px;
+    box-shadow: -3px 17px 23px 1px rgb(0 0 0 / 58%);
+    display: flex;
+    flex-direction: column;
+}
+
+.dim {
+    position: absolute;
+    top: 2rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }

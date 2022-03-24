@@ -1,23 +1,31 @@
 import Draggable, {DraggableBounds, DraggableData, DraggableEvent, DraggableEventHandler} from "react-draggable";
-import React, {useState} from "react";
+import React, {SyntheticEvent, useContext, useState} from "react";
 import styles from './Box.module.css'
-import {Resizable, ResizableBox} from "react-resizable";
+import {Resizable, ResizableBox, ResizeCallbackData} from "react-resizable";
+import {WorkSpaceContext} from "../../context/WorkSpaceContext";
 
 let g_zIndex = 0;
 
-export interface BoxProps  {
+export interface BoxProps {
     children?: React.ReactNode
+    size: { width: number, height: number }
+    position: { x: number, y: number }
+    setSize: (width: number, height: number) => void
+    setPosition: (x: number, y: number) => void
 }
+
 export function Box(props: BoxProps){
-    const [position, setPosition] = useState({x: 0, y: 0});
-    const [size, setSize] = useState({width:200, height:200});
+    const { position, setPosition, size, setSize } = props;
+
     const [bounds, setBounds] = useState<DraggableBounds | string | false >(false);
     const [zIndex, setZIndex] = useState(g_zIndex);
 
     const nodeRef = React.useRef<HTMLDivElement> (null);
 
+    const { setContentDim } = useContext(WorkSpaceContext);
+
     const trackPos = (data : { x:number, y:number }) => {
-        setPosition({ x: data.x, y: data.y });
+        setPosition(data.x, data.y);
     };
 
     const incZIndex = () => {
@@ -83,14 +91,25 @@ export function Box(props: BoxProps){
 
             setBounds(bounds);
         } else if(e.target && (e.target as HTMLElement).closest('.draggable_handle')) {
-              return;
+
         } else {
             return false;
         }
+        setContentDim(true);
     }
 
     const handleStop = (e: DraggableEvent, data: DraggableData) => {
         setBounds(false);
+        setContentDim(false);
+    }
+
+    const handleResizeStart = (e: SyntheticEvent, data: ResizeCallbackData) => {
+        setContentDim(true);
+    }
+
+    const handleResizeStop = (e: SyntheticEvent, data: ResizeCallbackData) => {
+        setSize(data.size.width, data.size.height);
+        setContentDim(false);
     }
 
     return(
@@ -100,30 +119,24 @@ export function Box(props: BoxProps){
                    onStop={handleStop}
                    bounds={bounds}
                    >
-                <div ref={nodeRef} style={{zIndex : zIndex}}>
-                    <ResizableBox width={200} height={200} resizeHandles={['s' , 'w' , 'e' , 'n' , 'sw' , 'nw' , 'se' , 'ne']}
+                <div ref={nodeRef} style={{zIndex : zIndex, transform: `translate(${position.x}px, ${position.y}px)`}} >
+                    <ResizableBox
+                        width={size.width}
+                        height={size.height}
+                        resizeHandles={['s' , 'w' , 'e' , 'n' , 'sw' , 'nw' , 'se' , 'ne']}
+                        onResizeStart={handleResizeStart}
+                        onResizeStop={handleResizeStop}
                     >
-                        <div className={styles.box}>
+                        <div className={styles.box} >
                             {props.children}
+                            <WorkSpaceContext.Consumer>
+                                { value => (
+                                    value.isContentDim && <div className={styles.dim}></div>
+                                )}
+                            </WorkSpaceContext.Consumer>
                         </div>
                     </ResizableBox>
                 </div>
         </Draggable>
-        /*
-           <div>
-               <ResizableBox width={200} height={200} resizeHandles={['s' , 'w' , 'e' , 'n' , 'sw' , 'nw' , 'se' , 'ne']}>
-                   <div
-                       style={{ backgroundColor: 'green', width: '100%', height: '100%' }}
-                   >
-                       <div>BOX</div>
-                       <div>BOX</div>
-                       <div>BOX</div>
-
-                       <div>BOX</div>
-                       <div>x: {position.x.toFixed(0)}, y: {position.y.toFixed(0)}</div>
-                   </div>
-               </ResizableBox>
-           </div>
-           */
     )
 }

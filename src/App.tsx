@@ -1,28 +1,22 @@
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import './App.css';
 import {Window, WindowProps} from "./features/windows/Window";
 import {WorkSpaceContext, WorkSpaceContextComponent} from "./context/WorkSpaceContext";
+import {DockContextComponent} from "./context/DockContext";
 
 
 let g_idx = 0;
 function App() {
-    const [windows, setWindows] = useState<Array<WindowProps>>([]);
-
-    const addWindow = () => {
-        setWindows([...windows, {
-            idx : g_idx++
-        }])
-    }
-
     return (
         <div className="App">
             <WorkSpaceContextComponent>
-                <WorkSpaceContext.Consumer>
-                    { => (
-
-                        <button style={{ position: 'absolute', bottom: '20px', left: '20px'}} onClick={addWindow}>ADD</button>
-                    )}
-                </WorkSpaceContext.Consumer>
+                <DockContextComponent>
+                    <WorkSpaceContext.Consumer>
+                        { value => (
+                            <button style={{ position: 'absolute', bottom: '20px', left: '20px'}} onClick={ value.createWindow }>ADD</button>
+                        )}
+                    </WorkSpaceContext.Consumer>
+                </DockContextComponent>
             </WorkSpaceContextComponent>
         </div>
     );

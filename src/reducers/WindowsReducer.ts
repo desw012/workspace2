@@ -12,7 +12,7 @@ export interface WindowProps{
 
 interface Action {
     type: string,
-    payload : object
+    payload : any
 }
 
 export const WindowsReducerInitialState = {
@@ -29,6 +29,11 @@ export function WindowsReducer(state : WindowsState, action : Action ) : Windows
             }
             return {
                 idx : idx, windows : [...state.windows, windows]
+            }
+        case 'close':
+            const windows2 = state.windows.filter( window => window.idx !== action.payload.idx )
+            return {
+                idx : state.idx, windows : windows2
             }
         default:
     }
