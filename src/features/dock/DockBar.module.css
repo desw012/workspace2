@@ -1,0 +1,36 @@
+.DockBar {
+    z-index: 0;
+    position: absolute;
+    bottom: -50px;
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition-duration: 0.3s;
+    padding: 5px;
+}
+.DockBar:hover {
+    bottom: 0;
+}
+
+.DockItem {
+    display: flex;
+    width: 40px;
+    height: 40px;
+    background: #61dafb;
+    border-radius: 3px;
+    margin: 5px 5px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.DockItem > span {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    text-align: center;
+}
+.DockItem:hover {
+    background: yellow;
+}

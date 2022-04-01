@@ -1,4 +1,5 @@
-import React, {useReducer} from "react";
+import React, {useEffect, useReducer} from "react";
+import {DockBar} from "../features/dock/DockBar";
 
 const defaultValue = {
     addDock : () => { },
@@ -13,6 +14,12 @@ export const DockContext = React.createContext(defaultValue)
 
 export function DockContextComponent(props: DockContextComponentProps){
     //const [dockState, dispatch] = useReducer();
+
+
+    useEffect(()=>{
+
+    })
+
     const addDock = () => {
 
     }
@@ -26,6 +33,7 @@ export function DockContextComponent(props: DockContextComponentProps){
             addDock: addDock
             ,removeDock: removeDock
         }} >
+            <DockBar></DockBar>
             {props.children}
         </DockContext.Provider>
     )

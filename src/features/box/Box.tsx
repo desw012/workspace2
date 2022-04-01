@@ -1,39 +1,86 @@
 import Draggable, {DraggableBounds, DraggableData, DraggableEvent, DraggableEventHandler} from "react-draggable";
-import React, {SyntheticEvent, useContext, useState} from "react";
+import React, {RefObject, SyntheticEvent, useContext, useEffect, useState} from "react";
 import styles from './Box.module.css'
 import {Resizable, ResizableBox, ResizeCallbackData} from "react-resizable";
 import {WorkSpaceContext} from "../../context/WorkSpaceContext";
+import {WindowsApiContext, WindowsStateContext} from "../../context/WindowContext";
+import {Rectangle} from "./Rect";
 
 let g_zIndex = 0;
+const g_zIndexMap = new Map<number, number>();
+
+export type ResizeMode = 'minimum' | 'maximum' | 'dock' | undefined | null;
 
 export interface BoxProps {
     children?: React.ReactNode
-    size: { width: number, height: number }
-    position: { x: number, y: number }
-    setSize: (width: number, height: number) => void
-    setPosition: (x: number, y: number) => void
+    id: number
+    boxStyles: BoxStyles
+    update: ( rect: Rectangle, resizeMode?: ResizeMode ) => void
+    focus: () => void
+    rootRef? : React.RefObject<HTMLDivElement>
+}
+
+export interface BoxStyles {
+    zIndex : number,
+    rect : Rectangle,
+    prevRect? : Rectangle,
+    resizeMode? : ResizeMode
+}
+
+export const defaultBoxStyles : BoxStyles = {
+    zIndex : 0,
+    rect : {
+        x: 0,
+        y: 0,
+        w: 500,
+        h: 500
+    }
 }
 
 export function Box(props: BoxProps){
-    const { position, setPosition, size, setSize } = props;
+    const { update, focus, boxStyles, rootRef } = props;
+    const { zIndex, rect } = boxStyles;
 
     const [bounds, setBounds] = useState<DraggableBounds | string | false >(false);
-    const [zIndex, setZIndex] = useState(g_zIndex);
+    const [extendsGuide, setExtendsGuide] = useState<null | 'left' | 'right' | 'full' >(null);
+    const [left, setLeft ] = useState<number>(0);
+    const [resized, setResized] = useState<boolean>(false);
+
 
     const nodeRef = React.useRef<HTMLDivElement> (null);
+    const extendsGuideRef = React.useRef<HTMLDivElement> (null);
 
-    const { setContentDim } = useContext(WorkSpaceContext);
+    const { setContentDim } = useContext(WindowsApiContext);
 
-    const trackPos = (data : { x:number, y:number }) => {
-        setPosition(data.x, data.y);
+    const trackPos = (e: DraggableEvent, data : DraggableData) => {
+        console.log(data.x)
+        if(rootRef?.current && "clientX" in e) {
+            const rootRect = rootRef?.current?.getBoundingClientRect();
+
+            if (!resized && e.clientX < rootRect.left + 30) {
+                setExtendsGuide('left');
+            } else if (!resized && e.clientX > (rootRect.right - 30)) {
+                setExtendsGuide('right');
+            } else if(e.clientY < rootRect.top){
+                setExtendsGuide('full');
+            } else {
+                setExtendsGuide(null);
+            }
+
+            if(!resized && boxStyles.resizeMode && boxStyles.prevRect){
+                const margin = e.clientX - rootRect.left - rect.x  - boxStyles.prevRect.w / 2;
+                setLeft(margin);
+            }
+        }
+        if( !resized && boxStyles.resizeMode && boxStyles.prevRect){
+            update({x: data.x, y: data.y, w: boxStyles.prevRect.w, h: boxStyles.prevRect.h});
+        }else {
+            update({x: data.x, y: data.y, w: rect.w, h: rect.h});
+        }
     };
 
-    const incZIndex = () => {
-        setZIndex(++g_zIndex);
-    }
-
     const handleStart = (e: DraggableEvent, data: DraggableData) => {
-        incZIndex();
+        focus();
 
         if(e.target && (e.target as HTMLElement).classList.contains('react-resizable-handle')){
             let resizeClassName = '';
@@ -101,42 +148,75 @@ export function Box(props: BoxProps){
     const handleStop = (e: DraggableEvent, data: DraggableData) => {
         setBounds(false);
         setContentDim(false);
+
+        if (extendsGuide) {
+            const guideRect = extendsGuideRef.current?.getBoundingClientRect()
+            if (guideRect) {
+                update({x: guideRect.x, y: guideRect.y, w: guideRect.width, h: guideRect.height}, extendsGuide === 'full' ? 'maximum' : 'dock');
+            }
+        }else if(left > 0){
+            update({x: left + rect.x, y: rect.y, w: rect.w, h: rect.h});
+        }
+
+
+
+        setExtendsGuide(null);
+        setLeft(0);
+
     }
 
     const handleResizeStart = (e: SyntheticEvent, data: ResizeCallbackData) => {
         setContentDim(true);
+        setResized(true);
     }
 
     const handleResizeStop = (e: SyntheticEvent, data: ResizeCallbackData) => {
-        setSize(data.size.width, data.size.height);
+        if (resized) {
+            update({x: rect.x, y: rect.y, w: data.size.width, h: data.size.height});
+            setResized(false);
+        }
         setContentDim(false);
     }
 
     return(
-        <Draggable onDrag={ (e, data) => trackPos(data)}
-                   nodeRef={nodeRef}
-                   onStart={handleStart}
-                   onStop={handleStop}
-                   bounds={bounds}
-                   >
-                <div ref={nodeRef} style={{zIndex : zIndex, transform: `translate(${position.x}px, ${position.y}px)`}} >
-                    <ResizableBox
-                        width={size.width}
-                        height={size.height}
-                        resizeHandles={['s' , 'w' , 'e' , 'n' , 'sw' , 'nw' , 'se' , 'ne']}
-                        onResizeStart={handleResizeStart}
-                        onResizeStop={handleResizeStop}
-                    >
-                        <div className={styles.box} >
-                            {props.children}
-                            <WorkSpaceContext.Consumer>
-                                { value => (
-                                    value.isContentDim && <div className={styles.dim}></div>
-                                )}
-                            </WorkSpaceContext.Consumer>
-                        </div>
-                    </ResizableBox>
+        <>
+            {
+                extendsGuide &&
+                <div ref={extendsGuideRef}
+                    style={{
+                        position: "absolute",
+                        height: "100%",
+                        width: extendsGuide === 'full' ? '100vw' : "50vw",
+                        zIndex: zIndex,
+                        right: extendsGuide === 'right' ? '0' : 'initial',
+                        backgroundColor: "rgba(0, 0, 0, 0.3)",
+                        borderRadius: "12px"
+                    }}>
                 </div>
-        </Draggable>
+            }
+            <Draggable onDrag={ (e, data) => trackPos(e, data)}
+                       nodeRef={nodeRef}
+                       onStart={handleStart}
+                       onStop={handleStop}
+                       bounds={bounds}
+                       position={{x: rect.x, y: rect.y}}
+                       offsetParent={rootRef?.current as HTMLElement}
+                       >
+                    <div ref={nodeRef} style={{zIndex : zIndex, marginLeft:`${left}px` }} >
+                        <ResizableBox
+                            width={ rect.w }
+                            height={ rect.h }
+                            resizeHandles={['s' , 'w' , 'e' , 'n' , 'sw' , 'nw' , 'se' , 'ne']}
+                            onResizeStart={handleResizeStart}
+                            onResizeStop={handleResizeStop}
+                        >
+                            <div className={styles.box} >
+                                {props.children}
+                            </div>
+                        </ResizableBox>
+                    </div>
+            </Draggable>
+
+        </>
     )
 }
