@@ -16,6 +16,7 @@
 }
 
 .DockItem {
+    position: relative;
     display: flex;
     width: 40px;
     height: 40px;
@@ -33,4 +34,21 @@
 }
 .DockItem:hover {
     background: yellow;
+}
+.SplitItem {
+    width: 1px;
+    height: 40px;
+    background: #61dafb;
+    margin: 5px 5px;
+}
+
+.dot {
+    position: absolute;
+    bottom: 3px;
+    width: 20%;
+    height: 3px;
+    background: red;
+}
+.dot.active {
+    width: 80%;
 }

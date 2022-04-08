@@ -8,13 +8,15 @@ import {WindowInfo} from "../../reducers/WindowsReducer";
 export interface WindowProps {
     id : number,
     url? : string,
-    windowInfo : WindowInfo
+    windowInfo : WindowInfo,
+    children?: React.ReactNode
 }
 
 export function Window(props: WindowProps){
     const { id, windowInfo } = props;
     const { updateRect, focus } = useContext(WindowApiContext)
     const { rootRef } = useContext(WindowsStateContext);
+    const [src, setSrc] = useState(props.url);
 
     return (
     <Box
@@ -26,12 +28,18 @@ export function Window(props: WindowProps){
     >
         <Title windowInfo={windowInfo} />
         <div style={{position:"relative", height:"100%", width:"100%"}}>
-            <iframe name={`${id}`} className={styles.container} src={props.url}></iframe>
-            <WindowsStateContext.Consumer>
-                { value => (
-                    value.isContentDim && <div style={{position:"absolute", height:"100%", width:"100%", top:0}}></div>
-                )}
-            </WindowsStateContext.Consumer>
+            {
+                src &&
+                <>
+                    <iframe name={`${id}`} className={styles.container} src={src} title={"asd"}></iframe>
+                    <WindowsStateContext.Consumer>
+                        { value => (
+                            value.isContentDim && <div style={{position:"absolute", height:"100%", width:"100%", top:0}}></div>
+                        )}
+                    </WindowsStateContext.Consumer>
+                </>
+            }
+            { props.children }
         </div>
     </Box>
 

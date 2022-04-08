@@ -53,7 +53,6 @@ export function Box(props: BoxProps){
     const { setContentDim } = useContext(WindowsApiContext);
 
     const trackPos = (e: DraggableEvent, data : DraggableData) => {
-        console.log(data.x)
         if(rootRef?.current && "clientX" in e) {
             const rootRect = rootRef?.current?.getBoundingClientRect();
 
@@ -154,11 +153,10 @@ export function Box(props: BoxProps){
             if (guideRect) {
                 update({x: guideRect.x, y: guideRect.y, w: guideRect.width, h: guideRect.height}, extendsGuide === 'full' ? 'maximum' : 'dock');
             }
-        }else if(left > 0){
+        }else if(left !== 0){
+            console.log(left + rect.x);
             update({x: left + rect.x, y: rect.y, w: rect.w, h: rect.h});
         }
-
-
 
         setExtendsGuide(null);
         setLeft(0);

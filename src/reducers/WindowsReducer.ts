@@ -1,10 +1,12 @@
 import {BoxStyles, defaultBoxStyles, ResizeMode} from "../features/box/Box";
 import {Rectangle} from "../features/box/Rect";
+import {WindowsStateContext} from "../context/WindowContext";
 
 export interface WindowInfo {
     id : number,
     url : string,
-    boxStyles : BoxStyles
+    boxStyles : BoxStyles,
+    isClose?: boolean
 }
 
 export interface CreateWindowAction {
@@ -30,7 +32,7 @@ interface WindowAction {
 
 export type WindowActions =  CreateWindowAction | WindowAction | UpdateRectAction;
 
-export const WindowsReducerInitialState = []
+export const WindowsReducerInitialState = []n
 
 let g_id = 0;
 let g_zIndex = 0;
@@ -63,7 +65,23 @@ const doCreateWindow = (state : Array<WindowInfo>, action : CreateWindowAction) 
 }
 
 const doCloseWindow = (state : Array<WindowInfo>, action : WindowAction) => {
-    return state.filter( window => window.id !== action.payload )
+    const _t =  state.map( window => {
+        if(window.id === action.payload){
+            return {
+                ...window,
+                isClose : true
+            }
+        }
+        return window
+    });
+
+    let find = -1;
+    _t.forEach((window, idx)=>{
+        if(!window.isClose) find = -1;
+        else if(find === -1) find = idx;
+    })
+    if(find > -1)  _t.splice(find, _t.length - find);
+    return _t;
 }
 
 const doFocusWindow = (state : Array<WindowInfo>, action : WindowAction) : Array<WindowInfo> => {
